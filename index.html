@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rare Earths: The 17 Elements Behind Everything, 2025 Data Dashboard</title>
+<meta name="description" content="Interactive data dashboard on rare earth elements: production, where they hide, what they do, and the China-dominated supply chain. By Ibtisam Ahmed Khan.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Fira+Sans:wght@300;400;500;600;700;800&display=swap');
+  :root{
+    --bg:#0c0a12; --card:#16131f; --card2:#1d1929; --border:#2c2640;
+    --text:#f1eef8; --muted:#a99fc0; --steel:#8b93b5; --accent:#b07bf0;
+    --accent2:#34d6c0; --magenta:#e96bd0; --amber:#ffc24d; --green:#3ee0a4; --red:#ff6b6b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Fira Sans',system-ui,sans-serif;min-height:100vh;line-height:1.55;
+    background-image:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(176,123,240,.12),transparent),
+    radial-gradient(ellipse 80% 50% at 80% -10%,rgba(52,214,192,.10),transparent)}
+  .wrap{max-width:1280px;margin:0 auto;padding:32px 24px 60px}
+  header{text-align:center;margin-bottom:8px}
+  .eyebrow{font-family:'Fira Code',monospace;font-size:12px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:12px}
+  h1{font-size:clamp(28px,4vw,46px);font-weight:800;letter-spacing:-1px;line-height:1.1;
+    background:linear-gradient(90deg,var(--accent2) 5%,#fff 45%,var(--accent) 92%);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  .sub{color:var(--muted);font-size:15px;margin-top:10px;max-width:800px;margin-left:auto;margin-right:auto}
+  .tabs{display:flex;gap:8px;justify-content:center;margin:28px 0;flex-wrap:wrap;position:sticky;top:0;z-index:10;
+    padding:12px 0;background:linear-gradient(180deg,var(--bg) 70%,transparent)}
+  .tab{display:inline-flex;align-items:center;gap:9px;padding:10px 20px;border-radius:99px;border:1px solid var(--border);
+    background:var(--card);color:var(--muted);cursor:pointer;font-size:14px;font-weight:600;font-family:inherit;
+    transition:background .2s,color .2s,border-color .2s,transform .2s}
+  .tab svg{width:17px;height:17px;flex-shrink:0}
+  .tab:hover{border-color:var(--accent);color:var(--text);transform:translateY(-2px)}
+  .tab:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .tab.active{background:linear-gradient(90deg,#7a3fc0,#1f8f80);color:#fff;border-color:transparent;
+    box-shadow:0 4px 20px rgba(176,123,240,.25)}
+  .panel{display:none;animation:fade .4s ease}
+  .panel.show{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+  .kpi{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+  .kpi:hover{transform:translateY(-4px);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+  .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+  .kpi .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;font-weight:600}
+  .kpi .val{font-size:30px;font-weight:800;font-family:'Fira Code',monospace;letter-spacing:-1px}
+  .kpi .delta{font-size:13px;margin-top:6px;font-weight:600}
+  .up{color:var(--green)} .down{color:var(--red)} .flat{color:var(--muted)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  .grid .full{grid-column:1/-1}
+  @media(max-width:860px){.grid{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px;transition:border-color .3s}
+  .card:hover{border-color:#3a3354}
+  .card h3{font-size:16px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+  .card h3 svg{width:18px;height:18px;color:var(--accent)}
+  .card .note{font-size:12.5px;color:var(--muted);margin-bottom:14px}
+  .chartbox{position:relative;height:340px}
+  .chartbox.tall{height:430px}
+  .cmp{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .cmpcard{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:26px;display:flex;flex-direction:column;align-items:center;text-align:center;transition:transform .2s,border-color .2s}
+  .cmpcard:hover{transform:translateY(-4px);border-color:var(--accent)}
+  .cmpcard svg.icon{width:64px;height:64px;color:var(--accent2);margin-bottom:14px}
+  .cmpcard .big{font-size:34px;font-weight:800;font-family:'Fira Code',monospace;color:var(--accent);letter-spacing:-1px;line-height:1}
+  .cmpcard .who{font-size:16px;font-weight:700;margin:10px 0 6px}
+  .cmpcard .desc{font-size:12.5px;color:var(--muted);line-height:1.5}
+  /* supply chain steps */
+  .chain{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:8px}
+  @media(max-width:760px){.chain{grid-template-columns:1fr}}
+  .step{background:var(--card2);border:1px solid var(--border);border-radius:16px;padding:22px;position:relative}
+  .step .s-num{font-family:'Fira Code',monospace;font-size:13px;color:var(--accent2);font-weight:700;letter-spacing:1px}
+  .step .s-name{font-size:18px;font-weight:700;margin:6px 0 14px}
+  .step .s-share{font-size:46px;font-weight:900;font-family:'Fira Code',monospace;color:var(--accent);letter-spacing:-2px;line-height:1}
+  .step .s-cap{font-size:12.5px;color:var(--muted);margin-top:6px}
+  .step .bar{height:8px;border-radius:6px;background:#2a2440;margin-top:14px;overflow:hidden}
+  .step .bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  footer{margin-top:36px;text-align:center;color:var(--muted);font-size:12px;line-height:1.9}
+  .infobox{font-size:14px;line-height:1.8}
+  .infobox strong{color:#fff}
+  @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-atom" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.6"/><path d="M12 2c-3 4-3 16 0 20M12 2c3 4 3 16 0 20M3.5 7c4.5-1.2 12.5 4.8 17 6M3.5 17c4.5 1.2 12.5-4.8 17-6"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7h14M7 7l-3 7a3 3 0 0 0 6 0L7 7Zm10 0-3 7a3 3 0 0 0 6 0l-3-7Z"/></symbol>
+  <symbol id="i-magnet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3H3v8a9 9 0 0 0 18 0V3h-3v8a6 6 0 0 1-12 0V3ZM3 7h3M18 7h3"/></symbol>
+  <symbol id="i-chain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a3 3 0 0 1 3-3h3a3 3 0 0 1 0 6h-1M15 12a3 3 0 0 1-3 3H9a3 3 0 0 1 0-6h1"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V4M4 4h13l-2 4 2 4H4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></symbol>
+  <symbol id="i-car" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M3 13l2-5a2 2 0 0 1 2-1.4h10A2 2 0 0 1 19 8l2 5v4H3v-4Z"/><circle cx="7.5" cy="17" r="1.8"/><circle cx="16.5" cy="17" r="1.8"/></symbol>
+  <symbol id="i-wind" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 12v10M9 22h6M12 12 12 3M12 12l8 4M12 12 4 16"/><circle cx="12" cy="12" r="1.4"/></symbol>
+  <symbol id="i-plane" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16v-2l-8-5V3.5A1.5 1.5 0 0 0 11.5 2 1.5 1.5 0 0 0 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5L21 16Z"/></symbol>
+</svg>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Materials Data Series · No. 04</div>
+    <h1>Rare Earths: The 17 Elements Behind Everything</h1>
+    <div class="sub">They are barely rare, and the world mines only 390,000 tonnes a year, less than it makes in steel every two hours. Yet without them there are no EV motors, no wind turbines, no smartphones, no guided missiles. And one country controls almost the entire supply chain. 2024 (USGS / IEA) · Compiled June 2026</div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-p="elements"><svg><use href="#i-atom"/></svg>The Elements</button>
+    <button class="tab" data-p="scale"><svg><use href="#i-scale"/></svg>Where They Hide</button>
+    <button class="tab" data-p="uses"><svg><use href="#i-magnet"/></svg>What They Do</button>
+    <button class="tab" data-p="chain"><svg><use href="#i-chain"/></svg>The Supply Chain</button>
+    <button class="tab" data-p="why"><svg><use href="#i-flag"/></svg>Why It Matters</button>
+  </nav>
+
+  <!-- ELEMENTS -->
+  <div class="panel show" id="elements">
+    <div class="kpis">
+      <div class="kpi"><div class="lbl">World mine output 2024</div><div class="val">390 kt</div><div class="delta flat">smaller than any other metal here</div></div>
+      <div class="kpi"><div class="lbl">China, mining share</div><div class="val">69%</div><div class="delta down">270 kt, more than everyone else combined</div></div>
+      <div class="kpi"><div class="lbl">United States, #2</div><div class="val">45 kt</div><div class="delta flat">~12% of world output</div></div>
+      <div class="kpi"><div class="lbl">Elements in the group</div><div class="val">17</div><div class="delta flat">15 lanthanides + scandium + yttrium</div></div>
+    </div>
+    <div class="grid">
+      <div class="card full">
+        <h3><svg><use href="#i-atom"/></svg>2024 Rare-Earth Mine Production by Country (kt REO)</h3>
+        <div class="note">Calling them "rare" is misleading. They are reasonably common in the crust, just hard to separate. The concentration is not geological, it is industrial: China chose to dominate this, decades ago.</div>
+        <div class="chartbox tall"><canvas id="mineBar"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Reserves Are Less Concentrated Than Output</h3>
+        <div class="note">China holds the largest reserves, but Brazil, Vietnam, India and Australia all sit on plenty. The problem was never where the ore is. It is who can process it.</div>
+        <div class="chartbox"><canvas id="reservesBar"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Mine Production Trend (kt REO)</h3>
+        <div class="note">Output has climbed sharply as magnet demand took off, but it is still a rounding error next to steel, copper or aluminium.</div>
+        <div class="chartbox"><canvas id="trendLine"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCALE / WHERE THEY HIDE -->
+  <div class="panel" id="scale">
+    <div class="card full" style="margin-bottom:20px">
+      <h3><svg><use href="#i-scale"/></svg>Tiny Amounts, Hiding in Everything</h3>
+      <div class="note">Rare earths are never the bulk of a product, just a few grams or kilos. But take them out and the thing stops working. Verify-and-cite figures in the footer.</div>
+      <div class="cmp">
+        <div class="cmpcard"><svg class="icon"><use href="#i-phone"/></svg><div class="big">~0.5 g</div><div class="who">in a smartphone</div><div class="desc">Tiny, but in the speakers, vibration motor and screen of every phone.</div></div>
+        <div class="cmpcard"><svg class="icon"><use href="#i-car"/></svg><div class="big">~2 kg</div><div class="who">in an EV motor</div><div class="desc">Almost every electric car runs on a neodymium magnet.</div></div>
+        <div class="cmpcard"><svg class="icon"><use href="#i-wind"/></svg><div class="big">~1 t</div><div class="who">in a wind turbine</div><div class="desc">A direct-drive offshore turbine holds up to a tonne of rare-earth magnets.</div></div>
+        <div class="cmpcard"><svg class="icon"><use href="#i-plane"/></svg><div class="big">418 kg</div><div class="who">in an F-35</div><div class="desc">Modern defence runs on them: radar, actuators, guidance.</div></div>
+      </div>
+    </div>
+    <div class="card full">
+      <h3><svg><use href="#i-scale"/></svg>How Small Is 390 kt? (annual world production, Mt)</h3>
+      <div class="note">This is the punchline. The entire world's yearly rare-earth output is 0.39 Mt. The world makes more steel than that every two hours. Their power has nothing to do with volume.</div>
+      <div class="chartbox tall"><canvas id="metalsBar"></canvas></div>
+    </div>
+  </div>
+
+  <!-- USES -->
+  <div class="panel" id="uses">
+    <div class="grid">
+      <div class="card">
+        <h3><svg><use href="#i-magnet"/></svg>What Rare Earths Are Used For</h3>
+        <div class="note">Nearly half goes into permanent magnets, the strongest known. The rest cleans car exhaust, polishes glass and screens, and colours displays.</div>
+        <div class="chartbox tall"><canvas id="useDonut"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>It Is Really a Story About a Few Elements</h3>
+        <div class="note">Of the 17, a handful do the heavy lifting. Neodymium and praseodymium make the magnets; cerium and lanthanum do catalysis and polishing.</div>
+        <div class="chartbox tall"><canvas id="elementBar"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPLY CHAIN -->
+  <div class="panel" id="chain">
+    <div class="card full" style="margin-bottom:20px">
+      <h3><svg><use href="#i-chain"/></svg>China's Grip Tightens at Every Step</h3>
+      <div class="note">This is the whole story in one chart. Mining is shareable, and other countries do dig. But the further down the chain you go, from ore to separated oxide to finished magnet, the more total China's control becomes.</div>
+      <div class="chain" id="chainSteps"></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h3><svg><use href="#i-chain"/></svg>China's Share Down the Chain (%)</h3>
+        <div class="note">Mining 69%, refining and separation 91%, finished permanent magnets 94%. The chokepoint is not the mine, it is the chemistry.</div>
+        <div class="chartbox"><canvas id="chainBar"></canvas></div>
+      </div>
+      <div class="card">
+        <h3>Why Processing, Not Mining, Is the Bottleneck</h3>
+        <div class="infobox" style="margin-bottom:0">
+          Separating one rare earth from another is genuinely hard. The elements are chemically almost identical, so refining means hundreds of repeated solvent-extraction stages, it is messy, it produces radioactive waste, and margins are thin. The West largely let China take this dirty, unglamorous middle of the chain over thirty years. Now a mine in California or Australia still has to ship its ore to China to be turned into usable metal. Building that processing capacity elsewhere is the real bottleneck, and it is why <strong>export controls on rare earths and magnets are now a front line of trade policy.</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY -->
+  <div class="panel" id="why">
+    <div class="kpis">
+      <div class="kpi"><div class="lbl">Magnets, share of demand</div><div class="val">~48%</div><div class="delta flat">the strongest magnets known</div></div>
+      <div class="kpi"><div class="lbl">China, magnet production</div><div class="val">94%</div><div class="delta down">of the world's sintered magnets</div></div>
+      <div class="kpi"><div class="lbl">Neodymium demand by 2050</div><div class="val">11-13x</div><div class="delta up">as clean tech scales</div></div>
+      <div class="kpi"><div class="lbl">In an EV vs a phone</div><div class="val">~4000x</div><div class="delta flat">~2 kg vs ~0.5 g</div></div>
+    </div>
+    <div class="card full">
+      <h3><svg><use href="#i-flag"/></svg>Why It Matters</h3>
+      <div class="infobox" style="margin-bottom:0">
+        Rare earths are the clearest example of a material whose importance has nothing to do with how much we use. A few hundred thousand tonnes a year sits underneath the entire electric and digital economy: the magnets in EV and wind generators, the phosphors in screens, the catalysts in refineries, the guidance systems in defence. Demand for the magnet elements could rise more than tenfold by 2050. And the supply chain is the most concentrated of any major material, with one country holding around 90% of processing and magnet-making. That is why every government with an industrial policy is now trying to build a rare-earth supply chain outside China, and why it will take a decade or more to do it. Mining is the easy part. Learning to separate the elements cleanly, at scale, and at a profit is the hard part the rest of the world skipped.
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Data: USGS Mineral Commodity Summaries 2025 (mine production, reserves) · IEA Rare Earth Elements analysis (supply chain shares, demand) · Adamas Intelligence (F-35 content) · JRC / Benchmark Minerals (device content). REO = rare-earth oxide equivalent.<br>
+    Mine output in kt (thousand tonnes) of REO. Device figures are typical values, rounded and source-attributed. Supply-chain shares are 2024 estimates.<br>
+    Built by Ibtisam Ahmed Khan · June 2026 · Materials Data Series No. 04 · Rare Earths · linkedin.com/in/ibtisam-ahmed-khan
+  </footer>
+</div>
+
+<script>
+Chart.defaults.color='#a99fc0';
+Chart.defaults.borderColor='rgba(169,159,192,.14)';
+Chart.defaults.font.family="'Fira Sans',system-ui,sans-serif";
+Chart.defaults.plugins.tooltip.backgroundColor='#1d1929';
+Chart.defaults.plugins.tooltip.padding=12;
+Chart.defaults.plugins.tooltip.cornerRadius=10;
+Chart.defaults.plugins.tooltip.titleFont={family:"'Fira Code',monospace"};
+const reduce=window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+Chart.defaults.animation=reduce?false:{duration:900,easing:'easeOutQuart'};
+
+const C={steel:'#8b93b5',accent:'#b07bf0',accent2:'#34d6c0',magenta:'#e96bd0',amber:'#ffc24d',green:'#3ee0a4',red:'#ff6b6b',mute:'#352f4a'};
+
+const mine=[
+ {n:'China',v:270,hi:true},{n:'United States',v:45},{n:'Myanmar',v:31},{n:'Australia',v:13},
+ {n:'Thailand',v:13},{n:'Nigeria',v:13},{n:'India',v:2.9},{n:'Russia',v:2.5},{n:'Madagascar',v:2.0}];
+const reserves=[['China',44],['Vietnam',22],['Brazil',21],['India',6.9],['Australia',5.7],['Russia',3.8],['United States',1.9]];
+const trend=[[2019,220],[2020,240],[2021,280],[2022,300],[2023,376],[2024,390]];
+const metals=[['Steel',1850],['Aluminium',72],['Copper',23],['Nickel',3.6],['Rare earths',0.39]];
+const uses=[['Magnets (NdFeB)',47.6],['Catalysts',15.7],['Polishing powders',10.5],['Metallurgy',6.4],['Glass',5.9],['Ceramics',3.1],['Battery alloys',1.6],['Other',9.2]];
+const elements=[['Neodymium',36],['Cerium',31],['Lanthanum',18],['Praseodymium',7],['Yttrium',3],['Others',5]];
+const chain=[['1. Mining (ore)',69,'Other countries do dig: USA, Myanmar, Australia'],['2. Refining / separation',91,'Where the chokepoint really is'],['3. Permanent magnets',94,'The finished, high-value product']];
+
+new Chart(mineBar,{type:'bar',
+ data:{labels:mine.map(m=>m.n),datasets:[{data:mine.map(m=>m.v),backgroundColor:mine.map(m=>m.hi?C.accent:C.steel),borderRadius:8,maxBarThickness:34}]},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} kt · ${(c.raw/390*100).toFixed(1)}% of world`}}},scales:{x:{title:{display:true,text:'2024 mine production (kt REO)'}},y:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#f1eef8'}}}}});
+
+new Chart(reservesBar,{type:'bar',
+ data:{labels:reserves.map(r=>r[0]),datasets:[{data:reserves.map(r=>r[1]),backgroundColor:reserves.map(r=>r[0]==='China'?C.accent:C.accent2),borderRadius:7,maxBarThickness:30}]},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} Mt of reserves`}}},scales:{x:{title:{display:true,text:'Reserves (Mt REO)'}},y:{grid:{display:false},ticks:{font:{size:11}}}}}});
+
+new Chart(trendLine,{type:'line',
+ data:{labels:trend.map(t=>t[0]),datasets:[{data:trend.map(t=>t[1]),borderColor:C.accent,backgroundColor:'rgba(176,123,240,.14)',fill:true,tension:.35,borderWidth:3,pointRadius:5,pointHoverRadius:8,pointBackgroundColor:'#0c0a12',pointBorderColor:C.accent,pointBorderWidth:2.5}]},
+ options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} kt mined`}}},scales:{y:{title:{display:true,text:'kt REO'},min:180},x:{grid:{display:false}}}}});
+
+new Chart(metalsBar,{type:'bar',
+ data:{labels:metals.map(m=>m[0]),datasets:[{data:metals.map(m=>m[1]),backgroundColor:metals.map(m=>m[0]==='Rare earths'?C.accent:C.steel),borderRadius:8,maxBarThickness:54}]},
+ options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw} Mt/yr`}}},scales:{y:{type:'logarithmic',title:{display:true,text:'Annual world production (Mt, log scale)'}},x:{grid:{display:false},ticks:{font:{size:13,weight:'600'},color:'#f1eef8'}}}}});
+
+new Chart(useDonut,{type:'doughnut',
+ data:{labels:uses.map(u=>u[0]+' '+u[1]+'%'),datasets:[{data:uses.map(u=>u[1]),backgroundColor:[C.accent,C.accent2,C.magenta,C.amber,C.steel,C.green,C.red,C.mute],borderColor:'#0c0a12',borderWidth:3,hoverOffset:12}]},
+ options:{responsive:true,maintainAspectRatio:false,cutout:'56%',plugins:{legend:{position:'right',labels:{usePointStyle:true,pointStyle:'circle',padding:8,font:{size:11}}},tooltip:{callbacks:{label:c=>` ${c.label}`}}}}});
+
+new Chart(elementBar,{type:'bar',
+ data:{labels:elements.map(e=>e[0]),datasets:[{data:elements.map(e=>e[1]),backgroundColor:elements.map(e=>e[0]==='Neodymium'?C.accent:C.steel),borderRadius:7,maxBarThickness:34}]},
+ options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.raw}% of demand`}}},scales:{x:{title:{display:true,text:'Share of rare-earth demand (%)'}},y:{grid:{display:false},ticks:{font:{size:12,weight:'600'},color:'#f1eef8'}}}}});
+
+/* Supply chain steps + bar */
+document.getElementById('chainSteps').innerHTML=chain.map(s=>`<div class="step">
+ <div class="s-num">STEP ${s[0].charAt(0)}</div>
+ <div class="s-name">${s[0].slice(3)}</div>
+ <div class="s-share">${s[1]}%</div>
+ <div class="s-cap">China's share · ${s[2]}</div>
+ <div class="bar"><i style="width:${s[1]}%"></i></div>
+</div>`).join('');
+
+new Chart(chainBar,{type:'bar',
+ data:{labels:chain.map(s=>s[0]),datasets:[{data:chain.map(s=>s[1]),backgroundColor:[C.accent2,C.accent,C.magenta],borderRadius:8,maxBarThickness:60}]},
+ options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` China makes ${c.raw}% at this step`}}},scales:{y:{max:100,title:{display:true,text:"China's share (%)"},ticks:{callback:v=>v+'%'}},x:{grid:{display:false},ticks:{font:{size:11,weight:'600'},color:'#f1eef8'}}}}});
+
+const tabs=document.querySelectorAll('.tab');
+tabs.forEach(t=>t.addEventListener('click',()=>{
+ tabs.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-selected','false')});
+ document.querySelectorAll('.panel').forEach(x=>x.classList.remove('show'));
+ t.classList.add('active');t.setAttribute('aria-selected','true');
+ document.getElementById(t.dataset.p).classList.add('show');
+ if(history.replaceState)history.replaceState(null,'','#'+t.dataset.p);
+}));
+const h=location.hash.replace('#','');
+if(h){const t=document.querySelector(`.tab[data-p="${h}"]`);if(t)t.click();}
+</script>
+</body>
+</html>
